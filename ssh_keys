@@ -1,0 +1,48 @@
+#!/bin/bash
+
+LOCAL_KEY_STORAGE=$HOME/.ssh/remote_keys
+REMOTE_ACCOUNT_USERNAME=root
+REMOTE_ACCOUNT_PASS=Avid123
+DEP=(ssh-keyscan ssh-keygen sshpass  ssh-copy-id)
+
+##Check if dependencies installed on the system
+echo "Checking dependencies..."
+for package in "${DEP[@]}"
+        do
+                check=""
+                check="$(command -vV $package >/dev/null && echo "true" || echo "false")"
+                if [ "$check" == false ]; then
+                        echo  "I need " $package " but can not find it. Please install or check your PATH variable. Exiting"
+                        exit 1
+                else
+                        echo $package "found"
+                fi
+        done
+
+
+
+##Create keys directory if not exists
+if [ ! -d $LOCAL_KEY_STORAGE ]; then
+        mkdir -p $LOCAL_KEY_STORAGE
+fi
+
+##Check if host is already present in known_hosts, if not - scan the key and add to known
+if grep -Fq $1 ~/.ssh/known_hosts; then
+        echo $1 "is already known host"
+else
+        ssh-keyscan -t rsa $1 2>&1 >> ~/.ssh/known_hosts
+        echo "copying" $1 "id to known hosts"
+fi
+
+## Check if key file is present and not null size , else generate new key
+if [ -e $LOCAL_KEY_STORAGE/$1 ] && [ -s $LOCAL_KEY_STORAGE/$1 ]; then
+        echo "Keys already present for" $1
+else
+        ssh-keygen -t rsa -q  -f $LOCAL_KEY_STORAGE/$1 -N ''
+        chmod 600 $LOCAL_KEY_STORAGE/$1*
+fi
+
+## Copy key to remote host
+sshpass -p $REMOTE_ACCOUNT_PASS ssh-copy-id  -i $LOCAL_KEY_STORAGE/$1.pub $REMOTE_ACCOUNT_USERNAME@$1
+
+exit 0
