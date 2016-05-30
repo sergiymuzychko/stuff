@@ -30,7 +30,7 @@ for i in chain(instancesA, instancesB):
         publicIPs.append(i.ip_address)
 
 
-# Check if transport-i-* A record values are in existing IP addresses list
+# Check if A records with name containing searchTemplate string are in existing IP addresses list
 number = 0
 for record in rrsets:
     if searchTemplate in record.name:
