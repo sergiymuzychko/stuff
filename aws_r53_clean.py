@@ -13,7 +13,7 @@ ec2b = boto.ec2.connect_to_region('eu-west-1',
 r53 = boto.connect_route53(aws_access_key_id='',
                            aws_secret_access_key='')
 searchTemplate = ""
-dnsZone = "Z39S22SCRHJER4"
+dnsZone = "AAAAAASCRHJER4"
 publicIPs = []
 dnsAvalues = []
 recordIP = ""
